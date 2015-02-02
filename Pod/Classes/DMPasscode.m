@@ -17,7 +17,6 @@
 
 static DMPasscode* instance;
 static const NSString* KEYCHAIN_NAME = @"passcode";
-static NSBundle* bundle;
 
 @interface DMPasscode () <DMPasscodeInternalViewControllerDelegate>
 @end
@@ -34,7 +33,6 @@ static NSBundle* bundle;
 + (void)initialize {
     [super initialize];
     instance = [[DMPasscode alloc] init];
-    bundle = [DMPasscode bundleWithName:@"DMPasscode.bundle"];
 }
 
 - (instancetype)init {
@@ -42,15 +40,6 @@ static NSBundle* bundle;
         _config = [[DMPasscodeConfig alloc] init];
     }
     return self;
-}
-
-+ (NSBundle*)bundleWithName:(NSString*)name {
-    NSString* mainBundlePath = [[NSBundle mainBundle] resourcePath];
-    NSString* frameworkBundlePath = [mainBundlePath stringByAppendingPathComponent:name];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:frameworkBundlePath]){
-        return [NSBundle bundleWithPath:frameworkBundlePath];
-    }
-    return nil;
 }
 
 #pragma mark - Public
