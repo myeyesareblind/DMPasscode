@@ -64,45 +64,45 @@
 }
 
 - (void)actionSetup:(UIButton *)sender {
-    [DMPasscode setupPasscodeInViewController:_rootViewController completion:^(BOOL success) {
-        [self updateViews];
-    }];
+//    [DMPasscode setupPasscodeInViewController:_rootViewController completion:^(BOOL success) {
+//        [self updateViews];
+//    }];
 }
 
 - (void)actionCheck:(UIButton *)sender {
-    [DMPasscode showPasscodeInViewController:_rootViewController completion:^(BOOL success) {
-        if (success) {
-            [sender setTitleColor:[UIColor greenColor] forState:UIControlStateNormal];
-        } else {
-            [sender setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-        }
-        [self updateViews];
-    }];
+//    [DMPasscode showPasscodeInViewController:_rootViewController completion:^(BOOL success) {
+//        if (success) {
+//            [sender setTitleColor:[UIColor greenColor] forState:UIControlStateNormal];
+//        } else {
+//            [sender setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+//        }
+//        [self updateViews];
+//    }];
 }
 
 - (void)actionRemove:(id)sender {
-    [DMPasscode removePasscode];
-    [_checkButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [self updateViews];
+//    [DMPasscode removePasscode];
+//    [_checkButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+//    [self updateViews];
 }
 
 - (void)updateViews {
-    BOOL passcodeSet = [DMPasscode isPasscodeSet];
-    _checkButton.enabled = passcodeSet;
-    _removeButton.enabled = passcodeSet;
+//    BOOL passcodeSet = [DMPasscode isPasscodeSet];
+//    _checkButton.enabled = passcodeSet;
+//    _removeButton.enabled = passcodeSet;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    if ([DMPasscode isPasscodeSet] && !_showingPasscode) {
-        _showingPasscode = YES;
-        [DMPasscode showPasscodeInViewController:self.window.rootViewController completion:^(BOOL success) {
-            if (success) {
-                NSLog(@"Win");
-            }else{
-                NSLog(@"Loss");
-            }
-        }];
-    }
+//    if ([DMPasscode isPasscodeSet] && !_showingPasscode) {
+//        _showingPasscode = YES;
+//        [DMPasscode showPasscodeInViewController:self.window.rootViewController completion:^(BOOL success) {
+//            if (success) {
+//                NSLog(@"Win");
+//            }else{
+//                NSLog(@"Loss");
+//            }
+//        }];
+//    }
 }
 
 -(void)applicationWillEnterForeground:(UIApplication *)application{

@@ -12,8 +12,10 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
+
   s.source_files = 'Pod/Classes'
 
-  s.public_header_files = 'Pod/Classes/DMPasscode.h', 'Pod/Classes/DMPasscodeConfig.h'
+  s.public_header_files = 'Pod/Classes/DMPasscode.h', 'Pod/Classes/DMPasscodeConfig.h', 'Pod/Classes/NSString+md5Digest.h'
   s.frameworks = 'UIKit', 'Security', 'LocalAuthentication'
+  s.dependency 'SSKeychain', '~> 1.2.1'
 end

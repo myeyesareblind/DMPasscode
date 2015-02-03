@@ -9,14 +9,14 @@
 #import "DMPasscode.h"
 #import "DMPasscodeInternalNavigationController.h"
 #import "DMPasscodeInternalViewController.h"
-#import "DMKeychain.h"
+#import "SSKeychain.h"
+#import "NSString+md5Digest.h"
 
 #ifdef __IPHONE_8_0
 #import <LocalAuthentication/LocalAuthentication.h>
 #endif
 
 static DMPasscode* instance;
-static const NSString* KEYCHAIN_NAME = @"passcode";
 
 @interface DMPasscode () <DMPasscodeInternalViewControllerDelegate>
 @end
@@ -28,6 +28,8 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
     int _count;
     NSString* _prevCode;
     DMPasscodeConfig* _config;
+    NSString* _userName;
+    NSString* _service;
 }
 
 + (void)initialize {
@@ -43,20 +45,28 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
 }
 
 #pragma mark - Public
-+ (void)setupPasscodeInViewController:(UIViewController *)viewController completion:(PasscodeCompletionBlock)completion {
-    [instance setupPasscodeInViewController:viewController completion:completion];
++ (void)setupPasscodeInViewController:(UIViewController *)viewController
+                          serviceName:(NSString*)serviceName
+                             userName:(NSString*)userName
+                           completion:(PasscodeCompletionBlock)completion {
+    [instance setupPasscodeInViewController:viewController
+                                serviceName:serviceName
+                                   userName:userName
+                                 completion:completion];
 }
 
-+ (void)showPasscodeInViewController:(UIViewController *)viewController completion:(PasscodeCompletionBlock)completion {
-    [instance showPasscodeInViewController:viewController completion:completion];
++ (void)showPasscodeInViewController:(UIViewController *)viewController
+                         serviceName:(NSString*)serviceName
+                            userName:(NSString*)userName
+                          completion:(PasscodeCompletionBlock)completion {
+    [instance showPasscodeInViewController:viewController
+                               serviceName:serviceName
+                                  userName:userName
+                                completion:completion];
 }
 
-+ (void)removePasscode {
-    [instance removePasscode];
-}
-
-+ (BOOL)isPasscodeSet {
-    return [instance isPasscodeSet];
++ (void)removePasscodeForServiceName:(NSString*)serviceName userName:(NSString*)userName {
+    [SSKeychain deletePasswordForService:serviceName account:userName];
 }
 
 + (void)setConfig:(DMPasscodeConfig *)config {
@@ -64,14 +74,26 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
 }
 
 #pragma mark - Instance methods
-- (void)setupPasscodeInViewController:(UIViewController *)viewController completion:(PasscodeCompletionBlock)completion {
+- (void)setupPasscodeInViewController:(UIViewController *)viewController
+                          serviceName:(NSString*)serviceName
+                             userName:(NSString*)userName
+                           completion:(PasscodeCompletionBlock)completion {
+    _userName = userName;
+    _service = serviceName;
     _completion = completion;
     [self openPasscodeWithMode:0 viewController:viewController];
 }
 
-- (void)showPasscodeInViewController:(UIViewController *)viewController completion:(PasscodeCompletionBlock)completion {
-    NSAssert([self isPasscodeSet], @"No passcode set");
+
+- (void)showPasscodeInViewController:(UIViewController *)viewController
+                         serviceName:(NSString*)serviceName
+                            userName:(NSString*)userName
+                          completion:(PasscodeCompletionBlock)completion {
+    _userName = userName;
+    _service = serviceName;
+    NSAssert([self.class userHashForServiceName:serviceName userName:userName], @"No passcode set");
     _completion = completion;
+    
     LAContext* context = [[LAContext alloc] init];
     if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:nil]) {
         [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics localizedReason:NSLocalizedString(@"Authenticate to access locked feature.", nil) reply:^(BOOL success, NSError* error) {
@@ -101,13 +123,13 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
     }
 }
 
-- (void)removePasscode {
-    [[DMKeychain defaultKeychain] removeObjectForKey:KEYCHAIN_NAME];
-}
-
-- (BOOL)isPasscodeSet {
-    BOOL ret = [[DMKeychain defaultKeychain] objectForKey:KEYCHAIN_NAME] != nil;
-    return ret;
++ (NSString*)userHashForServiceName:(NSString*)serviceName userName:(NSString*)userName {
+    NSError* error = nil;
+    NSString* pass = [SSKeychain passwordForService:serviceName account:userName error:&error];
+    if (error) {
+        NSLog(@"error retrieving password");
+    }
+    return pass;
 }
 
 - (void)setConfig:(DMPasscodeConfig *)config {
@@ -143,8 +165,17 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
             [_passcodeViewController reset];
         } else if (_count == 1) {
             if ([code isEqualToString:_prevCode]) {
-                [[DMKeychain defaultKeychain] setObject:code forKey:KEYCHAIN_NAME];
-                [self closeAndNotify:YES];
+                NSError* keyChainError = nil;
+                BOOL success = [SSKeychain setPassword:[self.class userHashWithCode:code userName:_userName]
+                                            forService:_service
+                                               account:_userName
+                                                 error:&keyChainError];
+                
+                if (keyChainError) {
+                    NSLog(@"failed to create password");
+                }
+            
+                [self closeAndNotify:success];
             } else {
                 UIAlertView* errorAlert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Codes did not match, please try again.", nil) message:nil delegate:nil cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"Okay", nil), nil];
                 [errorAlert show];
@@ -152,7 +183,9 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
             }
         }
     } else if (_mode == 1) {
-        if ([code isEqualToString:[[DMKeychain defaultKeychain] objectForKey:KEYCHAIN_NAME]]) {
+        NSString* existingHash = [self.class userHashForServiceName:_service userName:_userName];
+        NSString* thisHash = [self.class userHashWithCode:code userName:_userName];
+        if ([thisHash isEqualToString:existingHash]) {
             [self closeAndNotify:YES];
         } else {
             [_passcodeViewController setErrorMessage:[NSString stringWithFormat:NSLocalizedString(@"%i attempts left", nil), 2 - _count]];
@@ -167,6 +200,11 @@ static const NSString* KEYCHAIN_NAME = @"passcode";
 
 - (void)canceled {
     _completion(NO);
+}
+
++ (NSString*)userHashWithCode:(NSString*)code userName:(NSString*)userName {
+    NSString* string = [NSString stringWithFormat:@"%@%@2987diuh;^y", code, userName];
+    return [string MD5String];
 }
 
 @end

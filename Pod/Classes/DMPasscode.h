@@ -26,7 +26,10 @@ typedef void (^PasscodeCompletionBlock)(BOOL success);
  *  @param viewController The view controller in which the passcode screen will be presented
  *  @param completion     The completion block with a BOOL to inidcate if the setup was successfull
  */
-+ (void)setupPasscodeInViewController:(UIViewController *)viewController completion:(PasscodeCompletionBlock)completion;
++ (void)setupPasscodeInViewController:(UIViewController *)viewController
+                          serviceName:(NSString*)serviceName
+                             userName:(NSString*)userName
+                           completion:(PasscodeCompletionBlock)completion;
 
 /**
  *  Authenticate the user.
@@ -34,19 +37,22 @@ typedef void (^PasscodeCompletionBlock)(BOOL success);
  *  @param viewController The view controller in which the passcode screen will be presented
  *  @param completion     The completion block with a BOOL to inidcate if the authentication was successfull
  */
-+ (void)showPasscodeInViewController:(UIViewController *)viewController completion:(PasscodeCompletionBlock)completion;
++ (void)showPasscodeInViewController:(UIViewController *)viewController
+                         serviceName:(NSString*)serviceName
+                            userName:(NSString*)userName
+                          completion:(PasscodeCompletionBlock)completion;
 
 /**
  *  Remove the passcode from the keychain.
  */
-+ (void)removePasscode;
++ (void)removePasscodeForServiceName:(NSString*)serviceName userName:(NSString*)userName;
 
 /**
  *  Check if a passcode is already set.
  *
  *  @return BOOL indicating if a passcode is set
  */
-+ (BOOL)isPasscodeSet;
++ (NSString*)userHashForServiceName:(NSString*)serviceName userName:(NSString*)userName;
 
 /**
  *  Set a configuration.
