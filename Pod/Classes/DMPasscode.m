@@ -10,13 +10,16 @@
 #import "DMPasscodeInternalNavigationController.h"
 #import "DMPasscodeInternalViewController.h"
 #import "SSKeychain.h"
-#import "NSString+md5Digest.h"
 
 #ifdef __IPHONE_8_0
 #import <LocalAuthentication/LocalAuthentication.h>
 #endif
 
 static DMPasscode* instance;
+static DMPasscodeUserHashFunction* DMUserHashFunction;
+void DMPasscodeSetUserHashFunctionImplementation(DMPasscodeUserHashFunction* aFunc) {
+    DMUserHashFunction = aFunc;
+}
 
 @interface DMPasscode () <DMPasscodeInternalViewControllerDelegate>
 @end
@@ -203,8 +206,12 @@ static DMPasscode* instance;
 }
 
 + (NSString*)userHashWithCode:(NSString*)code userName:(NSString*)userName {
+    if (DMUserHashFunction) {
+        return DMUserHashFunction(code, userName);
+    }
+    
     NSString* string = [NSString stringWithFormat:@"%@%@2987diuh;^y", code, userName];
-    return [string MD5String];
+    return string;
 }
 
 @end

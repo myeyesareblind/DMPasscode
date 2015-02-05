@@ -1,5 +1,6 @@
 PODS:
-  - DMPasscode (1.2.0)
+  - DMPasscode (1.2.0):
+    - SSKeychain (~> 1.2.1)
   - Expecta (0.3.1)
   - Expecta+Snapshots (1.3.0):
     - Expecta
@@ -14,14 +15,13 @@ DEPENDENCIES:
   - Expecta+Snapshots
   - FBSnapshotTestCase
   - Specta (~> 0.2.1)
-  - SSKeyChain
 
 EXTERNAL SOURCES:
   DMPasscode:
     :path: ../
 
 SPEC CHECKSUMS:
-  DMPasscode: 0521b5df13c7fbc7efcce99e4f48e1c066bbbae5
+  DMPasscode: 04f64169bcde2282d2f68a76fab28761a10d5c78
   Expecta: 03aabd0a89d8dea843baecb19a7fd7466a69a31d
   Expecta+Snapshots: 0ec8bd543329a3944f5e5dc2a5cb220c3dde4ab0
   FBSnapshotTestCase: f9f225b5ba11c8d8c09075590490df16314e4d62

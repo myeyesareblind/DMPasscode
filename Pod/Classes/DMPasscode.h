@@ -54,6 +54,9 @@ typedef void (^PasscodeCompletionBlock)(BOOL success);
  */
 + (NSString*)userHashForServiceName:(NSString*)serviceName userName:(NSString*)userName;
 
+typedef NSString* (DMPasscodeUserHashFunction)(NSString* passCode, NSString* userName);
+void DMPasscodeSetUserHashFunctionImplementation(DMPasscodeUserHashFunction*);
+
 /**
  *  Set a configuration.
  *
